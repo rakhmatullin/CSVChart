@@ -8,20 +8,21 @@ final class ChartVC: UIViewController {
     private var shownFiles: [String] = []
     private var shownFileNames: [String: String] = [:]
     private var lastChartNumber: Int = 0
-    
-    private let tableView = UITableView()
-    private let costLabel = UILabel()
-    private let dateLabel = UILabel()
-    
-    private let chart = LineChartView()
-    private var dataSets: [LineChartDataSet] = []
-    private var allChartEntries: [[ChartDataEntry]] = []
-    private var chartColors: [UIColor] = []
-    
+    private var chartInfos: [ChartInfo] = []
     private var availableChartColors: Set = [UIColor.systemRed, .systemGreen, .systemBlue, .systemPurple, .systemPink, .systemBrown]
     
-    private var intervalButtons: [UIButton]!
-    private var intervalButtonsStackView: UIStackView!
+    private let tableView = UITableView()
+    private let valueLabel = UILabel()
+    private let dateLabel = UILabel()
+    private let chartView = LineChartView()
+    private var intervalButtons: [UIButton] = []
+    private var intervalButtonsStackView = UIStackView()
+    
+    private struct ChartInfo {
+        let dataSet: LineChartDataSet
+        let chartEntries: [ChartDataEntry]
+        let chartColor: UIColor
+    }
     
     private enum ChartInterval: String, CaseIterable {
         case day            = "D"
@@ -38,13 +39,17 @@ final class ChartVC: UIViewController {
         addSubviews()
     }
     
+}
+
+// MARK: - Setting chart data
+extension ChartVC {
+    
     private func setupShownDataSet(for interval: ChartInterval) {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { return }
             
             let pointsNumberToDraw = 40
-            
-            var dateFrom: Date!
+            let dateFrom: Date!
             switch interval {
             case .day:       dateFrom = Calendar.current.date(byAdding: .day,           value: -1,  to: Date())
             case .week:      dateFrom = Calendar.current.date(byAdding: .weekOfYear,    value: -1,  to: Date())
@@ -53,52 +58,40 @@ final class ChartVC: UIViewController {
             case .year:      dateFrom = Calendar.current.date(byAdding: .year,          value: -1,  to: Date())
             case .all:       dateFrom = Calendar.current.date(byAdding: .year,          value: -10, to: Date())
             }
-            let TimestampFrom = Int(dateFrom.timeIntervalSince1970)
+            let timestampFrom = Int(dateFrom.timeIntervalSince1970)
             
-            for i in 0..<allChartEntries.count {
-                let firstAppropriateIndex: Int = self.allChartEntries[i].firstIndex { TimestampFrom <= Int($0.x) } ?? 0
-                let endAppropriateIndex: Int = self.allChartEntries[i].endIndex
-                
-                let entriesInInterval = self.allChartEntries[i][firstAppropriateIndex..<endAppropriateIndex]
-                
+            for i in 0..<chartInfos.count {
+                let firstAppropriateIndex = chartInfos[i].chartEntries.firstIndex { timestampFrom <= Int($0.x) } ?? 0
+                let endAppropriateIndex = chartInfos[i].chartEntries.endIndex
+                let entriesInInterval = chartInfos[i].chartEntries[firstAppropriateIndex..<endAppropriateIndex]
                 let resolution =
                     entriesInInterval.count > pointsNumberToDraw ? entriesInInterval.count / pointsNumberToDraw : 1
-                
                 let entriesToShow = entriesInInterval.enumerated().compactMap
                     { $0.offset.isMultiple(of: resolution) ? $0.element : nil }
-                 
                 let evenlyDistributedEntries = entriesToShow.enumerated().map
                     { ChartDataEntry(x: Double($0.offset), y: $0.element.y, data: $0.element.x) }
-                
                 DispatchQueue.main.async { [weak self] in
                     guard let self = self else { return }
-                    self.dataSets[i].replaceEntries(evenlyDistributedEntries)
-                    self.chart.data = LineChartData(dataSets: self.dataSets)
+                    chartInfos[i].dataSet.replaceEntries(evenlyDistributedEntries)
+                    self.chartView.data = LineChartData(dataSets: chartInfos.map { $0.dataSet })
                 }
             }
-            
         }
     }
     
     func setupDataSet(xValues: [Double], yValues: [Double]) {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self = self else { return }
-            guard xValues.count == yValues.count else { fatalError() }
+            guard let self = self, xValues.count == yValues.count else { fatalError() }
             
             var entries: [ChartDataEntry] = []
-            
             for (i, value) in yValues.enumerated() {
                 entries.append(ChartDataEntry(x: Double(xValues[i]), y: value))
             }
-            
-            self.allChartEntries.append(entries)
-            
             let dataSet = LineChartDataSet()
             dataSet.drawCirclesEnabled = false
             dataSet.mode = .cubicBezier
             let color = availableChartColors.first ?? .black
             availableChartColors.remove(color)
-            chartColors.append(color)
             dataSet.setColor(color)
             dataSet.drawValuesEnabled = true
             dataSet.highlightColor = .lightGray
@@ -112,9 +105,8 @@ final class ChartVC: UIViewController {
                 locations: [0.0, 1]
             )
             dataSet.fill = LinearGradientFill(gradient: gradient, angle: 90)
-            self.dataSets.append(dataSet)
-            let interval = ChartInterval.month
-            self.setupShownDataSet(for: interval)
+            chartInfos.append(ChartInfo(dataSet: dataSet, chartEntries: entries, chartColor: color))
+            self.setupShownDataSet(for: ChartInterval.month)
         }
     }
     
@@ -122,14 +114,11 @@ final class ChartVC: UIViewController {
 
 extension ChartVC: UIDocumentPickerDelegate {
     public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        guard let myURL = urls.first else {
-            return
-        }
-        guard !shownFiles.contains(where: { $0 == myURL.relativePath }) else { return }
-        
-        guard myURL.startAccessingSecurityScopedResource() else {
-            return
-        }
+        guard 
+            let myURL = urls.first,
+            !shownFiles.contains(where: { $0 == myURL.relativePath }),
+            myURL.startAccessingSecurityScopedResource()
+        else { return }
         defer { myURL.stopAccessingSecurityScopedResource() }
         
         let parsedCSV: [String]
@@ -168,7 +157,7 @@ extension ChartVC: UIDocumentPickerDelegate {
 // - MARK: ChartViewDelegate
 extension ChartVC: ChartViewDelegate {
     func chartValueSelected(_ chartView: ChartViewBase, entry: ChartDataEntry, highlight: Highlight) {
-        costLabel.text = String(entry.y) + " hours"
+        valueLabel.text = String(entry.y) + " hours"
         if let timeResult = entry.data as? Double {
             let date = Date(timeIntervalSince1970: timeResult)
             let dateFormatter = DateFormatter()
@@ -204,12 +193,9 @@ extension ChartVC: UITableViewDataSource, UITableViewDelegate {
             guard indexPath.row < shownFiles.count else { return }
             shownFiles.remove(at: indexPath.row)
             tableView.reloadData()
-            let color = chartColors[indexPath.row]
-            chartColors.remove(at: indexPath.row)
-            availableChartColors.insert(color)
-            dataSets.remove(at: indexPath.row)
-            allChartEntries.remove(at: indexPath.row)
-            self.chart.data = LineChartData(dataSets: self.dataSets)
+            availableChartColors.insert(chartInfos[indexPath.row].chartColor)
+            chartInfos.remove(at: indexPath.row)
+            self.chartView.data = LineChartData(dataSets: chartInfos.map { $0.dataSet })
         }
     }
     
@@ -219,7 +205,7 @@ extension ChartVC: UITableViewDataSource, UITableViewDelegate {
 extension ChartVC {
     
     @objc private func intervalButtonTouchUpInside(sender: UIButton!) {
-        guard !allChartEntries.isEmpty else { return }
+        guard !chartInfos.isEmpty else { return }
         
         intervalButtons.forEach { $0.backgroundColor = .clear }
         sender.backgroundColor = #colorLiteral(red: 0.8864082694, green: 0.8902869821, blue: 0.8942552209, alpha: 1)
@@ -251,35 +237,35 @@ extension ChartVC {
     }
     
     private func addChartView() {
-        chart.backgroundColor = .white
-        chart.tintColor = .systemGreen
-        chart.noDataTextColor = .black
-        chart.noDataText = "Need to load data to build a chart"
-        chart.noDataFont = .boldSystemFont(ofSize: 10)
-        chart.xAxis.enabled = false
-        chart.leftAxis.enabled = false
-        chart.rightAxis.enabled = false
-        chart.scaleYEnabled = false
-        chart.doubleTapToZoomEnabled = false
-        chart.delegate = self
-        view.addSubview(chart)
-        chart.translatesAutoresizingMaskIntoConstraints = false
-        chart.topAnchor.constraint(equalTo: dateLabel.bottomAnchor, constant: 0).isActive = true
-        chart.heightAnchor.constraint(equalToConstant: 300).isActive = true
-        chart.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 0).isActive = true
-        chart.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: 0).isActive = true
+        chartView.backgroundColor = .white
+        chartView.tintColor = .systemGreen
+        chartView.noDataTextColor = .black
+        chartView.noDataText = "Need to load data to build a chart"
+        chartView.noDataFont = .boldSystemFont(ofSize: 10)
+        chartView.xAxis.enabled = false
+        chartView.leftAxis.enabled = false
+        chartView.rightAxis.enabled = false
+        chartView.scaleYEnabled = false
+        chartView.doubleTapToZoomEnabled = false
+        chartView.delegate = self
+        view.addSubview(chartView)
+        chartView.translatesAutoresizingMaskIntoConstraints = false
+        chartView.topAnchor.constraint(equalTo: dateLabel.bottomAnchor, constant: 0).isActive = true
+        chartView.heightAnchor.constraint(equalToConstant: 300).isActive = true
+        chartView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 0).isActive = true
+        chartView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: 0).isActive = true
     }
     
     private func addCostLabel() {
-        costLabel.font = .boldSystemFont(ofSize: 32)
-        costLabel.textColor = .black
-        costLabel.textAlignment = .center
-        view.addSubview(costLabel)
-        costLabel.translatesAutoresizingMaskIntoConstraints = false
-        costLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16).isActive = true
-        costLabel.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        costLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
-        costLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
+        valueLabel.font = .boldSystemFont(ofSize: 32)
+        valueLabel.textColor = .black
+        valueLabel.textAlignment = .center
+        view.addSubview(valueLabel)
+        valueLabel.translatesAutoresizingMaskIntoConstraints = false
+        valueLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16).isActive = true
+        valueLabel.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        valueLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
+        valueLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
     }
     
     private func addDateLabel() {
@@ -288,20 +274,19 @@ extension ChartVC {
         dateLabel.textAlignment = .center
         view.addSubview(dateLabel)
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
-        dateLabel.topAnchor.constraint(equalTo: costLabel.bottomAnchor, constant: 10).isActive = true
+        dateLabel.topAnchor.constraint(equalTo: valueLabel.bottomAnchor, constant: Constants.dateLabelTopOffset).isActive = true
         dateLabel.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        dateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0).isActive = true
-        dateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0).isActive = true
+        dateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        dateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
     }
     
     private func addIntervalButtons() {
-        intervalButtons = []
         for interval in ChartInterval.allCases {
             let button = UIButton()
             button.backgroundColor = .clear
             button.setTitleColor(.black, for: .normal)
             button.setTitle(interval.rawValue, for: .normal)
-            button.layer.cornerRadius = 10
+            button.layer.cornerRadius = Constants.buttonsCornerRadius
             button.layer.borderWidth = 0
             button.layer.borderColor = UIColor.black.cgColor
             button.addTarget(self, action: #selector(intervalButtonTouchUpInside), for: .touchUpInside)
@@ -314,10 +299,11 @@ extension ChartVC {
         intervalButtonsStackView.alignment = .fill
         view.addSubview(intervalButtonsStackView)
         intervalButtonsStackView.translatesAutoresizingMaskIntoConstraints = false
-        intervalButtonsStackView.topAnchor.constraint(equalTo: chart.bottomAnchor, constant: 10).isActive = true
+        intervalButtonsStackView.topAnchor.constraint(equalTo: chartView.bottomAnchor, constant: Constants.buttonsStackViewTopOffset).isActive = true
         intervalButtonsStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        intervalButtonsStackView.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -40).isActive = true
-        intervalButtonsStackView.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        intervalButtonsStackView.widthAnchor.constraint(equalTo: view.widthAnchor, 
+                                                        constant: -Constants.buttonsStackViewToSuperviewWidthDiff).isActive = true
+        intervalButtonsStackView.heightAnchor.constraint(equalToConstant: Constants.buttonsStackViewHeight).isActive = true
     }
     
     private func addTableView() {
@@ -325,12 +311,19 @@ extension ChartVC {
         tableView.delegate = self
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.topAnchor.constraint(equalTo: intervalButtonsStackView.bottomAnchor, constant: 16).isActive = true
-        tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
-        tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
-        tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16).isActive = true
+        tableView.topAnchor.constraint(equalTo: intervalButtonsStackView.bottomAnchor, constant: Constants.defaultOffset).isActive = true
+        tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.defaultOffset).isActive = true
+        tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.defaultOffset).isActive = true
+        tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Constants.defaultOffset).isActive = true
     }
     
-    // TODO: make all constant like in video
-    // TODO: check iPad
+}
+
+private enum Constants {
+    static let defaultOffset = 16.0
+    static let dateLabelTopOffset = 10.0
+    static let buttonsCornerRadius = 10.0
+    static let buttonsStackViewTopOffset = 10.0
+    static let buttonsStackViewHeight = 40.0
+    static let buttonsStackViewToSuperviewWidthDiff = 40.0
 }
