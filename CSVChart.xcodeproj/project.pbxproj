@@ -7,23 +7,28 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1BBCE8125CE22C9DF9967C55 /* Pods_CSVChart.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E60F112D6BDC50EC36E74F50 /* Pods_CSVChart.framework */; };
 		D289BB392B760ADA0090390D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D289BB382B760ADA0090390D /* AppDelegate.swift */; };
 		D289BB3B2B760ADA0090390D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D289BB3A2B760ADA0090390D /* SceneDelegate.swift */; };
-		D289BB3D2B760ADA0090390D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D289BB3C2B760ADA0090390D /* ViewController.swift */; };
-		D289BB402B760ADA0090390D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D289BB3E2B760ADA0090390D /* Main.storyboard */; };
+		D289BB3D2B760ADA0090390D /* ChartVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D289BB3C2B760ADA0090390D /* ChartVC.swift */; };
 		D289BB422B760ADC0090390D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D289BB412B760ADC0090390D /* Assets.xcassets */; };
 		D289BB452B760ADC0090390D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D289BB432B760ADC0090390D /* LaunchScreen.storyboard */; };
+		D289BB4E2B792CC30090390D /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D289BB4D2B792CC30090390D /* Utilities.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		17DF5F2E36135D53096747EF /* Pods-CSVChart.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CSVChart.release.xcconfig"; path = "Target Support Files/Pods-CSVChart/Pods-CSVChart.release.xcconfig"; sourceTree = "<group>"; };
+		4069B54AD0F885FB58BD8FDD /* Pods-CSVChart.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CSVChart.debug.xcconfig"; path = "Target Support Files/Pods-CSVChart/Pods-CSVChart.debug.xcconfig"; sourceTree = "<group>"; };
 		D289BB352B760ADA0090390D /* CSVChart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CSVChart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D289BB382B760ADA0090390D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D289BB3A2B760ADA0090390D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		D289BB3C2B760ADA0090390D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		D289BB3F2B760ADA0090390D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		D289BB3C2B760ADA0090390D /* ChartVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartVC.swift; sourceTree = "<group>"; };
 		D289BB412B760ADC0090390D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D289BB442B760ADC0090390D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D289BB462B760ADC0090390D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D289BB4C2B7624F00090390D /* CSVChart.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CSVChart.entitlements; sourceTree = "<group>"; };
+		D289BB4D2B792CC30090390D /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
+		E60F112D6BDC50EC36E74F50 /* Pods_CSVChart.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CSVChart.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,17 +36,37 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1BBCE8125CE22C9DF9967C55 /* Pods_CSVChart.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4699BA057C79D98AC2AE6726 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				4069B54AD0F885FB58BD8FDD /* Pods-CSVChart.debug.xcconfig */,
+				17DF5F2E36135D53096747EF /* Pods-CSVChart.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		8A6616FF3B93231B252198C8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E60F112D6BDC50EC36E74F50 /* Pods_CSVChart.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D289BB2C2B760ADA0090390D = {
 			isa = PBXGroup;
 			children = (
 				D289BB372B760ADA0090390D /* CSVChart */,
 				D289BB362B760ADA0090390D /* Products */,
+				4699BA057C79D98AC2AE6726 /* Pods */,
+				8A6616FF3B93231B252198C8 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -56,13 +81,14 @@
 		D289BB372B760ADA0090390D /* CSVChart */ = {
 			isa = PBXGroup;
 			children = (
+				D289BB4C2B7624F00090390D /* CSVChart.entitlements */,
 				D289BB382B760ADA0090390D /* AppDelegate.swift */,
 				D289BB3A2B760ADA0090390D /* SceneDelegate.swift */,
-				D289BB3C2B760ADA0090390D /* ViewController.swift */,
-				D289BB3E2B760ADA0090390D /* Main.storyboard */,
+				D289BB3C2B760ADA0090390D /* ChartVC.swift */,
 				D289BB412B760ADC0090390D /* Assets.xcassets */,
 				D289BB432B760ADC0090390D /* LaunchScreen.storyboard */,
 				D289BB462B760ADC0090390D /* Info.plist */,
+				D289BB4D2B792CC30090390D /* Utilities.swift */,
 			);
 			path = CSVChart;
 			sourceTree = "<group>";
@@ -74,9 +100,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D289BB492B760ADC0090390D /* Build configuration list for PBXNativeTarget "CSVChart" */;
 			buildPhases = (
+				88F7B9AAEA3F4A2CED643C47 /* [CP] Check Pods Manifest.lock */,
 				D289BB312B760ADA0090390D /* Sources */,
 				D289BB322B760ADA0090390D /* Frameworks */,
 				D289BB332B760ADA0090390D /* Resources */,
+				ECFF81F29D9024F80142E854 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -127,19 +155,61 @@
 			files = (
 				D289BB452B760ADC0090390D /* LaunchScreen.storyboard in Resources */,
 				D289BB422B760ADC0090390D /* Assets.xcassets in Resources */,
-				D289BB402B760ADA0090390D /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		88F7B9AAEA3F4A2CED643C47 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-CSVChart-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		ECFF81F29D9024F80142E854 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-CSVChart/Pods-CSVChart-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-CSVChart/Pods-CSVChart-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-CSVChart/Pods-CSVChart-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		D289BB312B760ADA0090390D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D289BB3D2B760ADA0090390D /* ViewController.swift in Sources */,
+				D289BB3D2B760ADA0090390D /* ChartVC.swift in Sources */,
 				D289BB392B760ADA0090390D /* AppDelegate.swift in Sources */,
+				D289BB4E2B792CC30090390D /* Utilities.swift in Sources */,
 				D289BB3B2B760ADA0090390D /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -147,14 +217,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		D289BB3E2B760ADA0090390D /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D289BB3F2B760ADA0090390D /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		D289BB432B760ADC0090390D /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -203,7 +265,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -266,7 +328,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -287,9 +349,11 @@
 		};
 		D289BB4A2B760ADC0090390D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4069B54AD0F885FB58BD8FDD /* Pods-CSVChart.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CSVChart/CSVChart.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = FM9677R7Y4;
@@ -297,9 +361,9 @@
 				INFOPLIST_FILE = CSVChart/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -315,9 +379,11 @@
 		};
 		D289BB4B2B760ADC0090390D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 17DF5F2E36135D53096747EF /* Pods-CSVChart.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CSVChart/CSVChart.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = FM9677R7Y4;
@@ -325,9 +391,9 @@
 				INFOPLIST_FILE = CSVChart/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

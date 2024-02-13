@@ -1,0 +1,6 @@
+framework module Pods_CSVChart {
+  umbrella header "Pods-CSVChart-umbrella.h"
+
+  export *
+  module * { export * }
+}
