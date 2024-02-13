@@ -42,7 +42,7 @@ final class ChartVC: UIViewController {
 }
 
 // MARK: - Setting chart data
-extension ChartVC {
+private extension ChartVC {
     
     private func setupShownDataSet(for interval: ChartInterval) {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
@@ -79,7 +79,7 @@ extension ChartVC {
         }
     }
     
-    func setupDataSet(xValues: [Double], yValues: [Double]) {
+    func setupDataSet(xValues: [Double], yValues: [Double], name: String) {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self, xValues.count == yValues.count else { fatalError() }
             
@@ -88,6 +88,7 @@ extension ChartVC {
                 entries.append(ChartDataEntry(x: Double(xValues[i]), y: value))
             }
             let dataSet = LineChartDataSet()
+            dataSet.label = name
             dataSet.drawCirclesEnabled = false
             dataSet.mode = .cubicBezier
             let color = availableChartColors.first ?? .black
@@ -133,7 +134,8 @@ extension ChartVC: UIDocumentPickerDelegate {
         
         shownFiles.append(myURL.relativePath)
         lastChartNumber += 1
-        shownFileNames[myURL.relativePath] = "Chart " + String(lastChartNumber)
+        let chartName = "Chart " + String(lastChartNumber)
+        shownFileNames[myURL.relativePath] = chartName
         tableView.reloadData()
         
         let dateFormatter = DateFormatter()
@@ -150,7 +152,7 @@ extension ChartVC: UIDocumentPickerDelegate {
                 values.append(value)
             }
         }
-        setupDataSet(xValues: timestamps, yValues: values)
+        setupDataSet(xValues: timestamps, yValues: values, name: chartName)
     }
 }
 
@@ -202,9 +204,9 @@ extension ChartVC: UITableViewDataSource, UITableViewDelegate {
 }
 
 // - MARK: Selectors
-extension ChartVC {
+private extension ChartVC {
     
-    @objc private func intervalButtonTouchUpInside(sender: UIButton!) {
+    @objc func intervalButtonTouchUpInside(sender: UIButton!) {
         guard !chartInfos.isEmpty else { return }
         
         intervalButtons.forEach { $0.backgroundColor = .clear }
@@ -226,9 +228,9 @@ extension ChartVC {
 }
 
 // - MARK: Adding subviews
-extension ChartVC {
+private extension ChartVC {
     
-    private func addSubviews() {
+    func addSubviews() {
         addCostLabel()
         addDateLabel()
         addChartView()
@@ -236,12 +238,11 @@ extension ChartVC {
         addTableView()
     }
     
-    private func addChartView() {
+    func addChartView() {
         chartView.backgroundColor = .white
         chartView.tintColor = .systemGreen
         chartView.noDataTextColor = .black
         chartView.noDataText = "Need to load data to build a chart"
-        chartView.noDataFont = .boldSystemFont(ofSize: 10)
         chartView.xAxis.enabled = false
         chartView.leftAxis.enabled = false
         chartView.rightAxis.enabled = false
@@ -250,37 +251,37 @@ extension ChartVC {
         chartView.delegate = self
         view.addSubview(chartView)
         chartView.translatesAutoresizingMaskIntoConstraints = false
-        chartView.topAnchor.constraint(equalTo: dateLabel.bottomAnchor, constant: 0).isActive = true
-        chartView.heightAnchor.constraint(equalToConstant: 300).isActive = true
-        chartView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 0).isActive = true
-        chartView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: 0).isActive = true
+        chartView.topAnchor.constraint(equalTo: dateLabel.bottomAnchor).isActive = true
+        chartView.heightAnchor.constraint(equalToConstant: Constants.chartViewHeight).isActive = true
+        chartView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
+        chartView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
     }
     
-    private func addCostLabel() {
-        valueLabel.font = .boldSystemFont(ofSize: 32)
+    func addCostLabel() {
+        valueLabel.font = Fonts.valueLabel
         valueLabel.textColor = .black
         valueLabel.textAlignment = .center
         view.addSubview(valueLabel)
         valueLabel.translatesAutoresizingMaskIntoConstraints = false
-        valueLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16).isActive = true
-        valueLabel.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        valueLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: Constants.defaultOffset).isActive = true
+        valueLabel.heightAnchor.constraint(equalToConstant: Constants.labelsHeight).isActive = true
         valueLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
         valueLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
     }
     
-    private func addDateLabel() {
-        dateLabel.font = .systemFont(ofSize: 16)
+    func addDateLabel() {
+        dateLabel.font = Fonts.dateLabel
         dateLabel.textColor = .black
         dateLabel.textAlignment = .center
         view.addSubview(dateLabel)
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
         dateLabel.topAnchor.constraint(equalTo: valueLabel.bottomAnchor, constant: Constants.dateLabelTopOffset).isActive = true
-        dateLabel.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        dateLabel.heightAnchor.constraint(equalToConstant: Constants.labelsHeight).isActive = true
         dateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         dateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
     }
     
-    private func addIntervalButtons() {
+    func addIntervalButtons() {
         for interval in ChartInterval.allCases {
             let button = UIButton()
             button.backgroundColor = .clear
@@ -306,7 +307,7 @@ extension ChartVC {
         intervalButtonsStackView.heightAnchor.constraint(equalToConstant: Constants.buttonsStackViewHeight).isActive = true
     }
     
-    private func addTableView() {
+    func addTableView() {
         tableView.dataSource = self
         tableView.delegate = self
         view.addSubview(tableView)
@@ -321,9 +322,16 @@ extension ChartVC {
 
 private enum Constants {
     static let defaultOffset = 16.0
+    static let chartViewHeight = 300.0
+    static let labelsHeight = 30.0
     static let dateLabelTopOffset = 10.0
     static let buttonsCornerRadius = 10.0
     static let buttonsStackViewTopOffset = 10.0
     static let buttonsStackViewHeight = 40.0
     static let buttonsStackViewToSuperviewWidthDiff = 40.0
+}
+
+private enum Fonts {
+    static let valueLabel = UIFont.boldSystemFont(ofSize: 32)
+    static let dateLabel = UIFont.systemFont(ofSize: 16)
 }
