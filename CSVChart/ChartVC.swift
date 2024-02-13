@@ -4,16 +4,16 @@ import DGCharts
 import MobileCoreServices
 import UniformTypeIdentifiers
 
-class ChartVC: UIViewController, ChartViewDelegate {
+final class ChartVC: UIViewController {
     private var shownFiles: [String] = []
     private var shownFileNames: [String: String] = [:]
     private var lastChartNumber: Int = 0
     
     private let tableView = UITableView()
-    private var costLabel: UILabel!
-    private var dateLabel: UILabel!
+    private let costLabel = UILabel()
+    private let dateLabel = UILabel()
     
-    private var chart: LineChartView!
+    private let chart = LineChartView()
     private var dataSets: [LineChartDataSet] = []
     private var allChartEntries: [[ChartDataEntry]] = []
     private var chartColors: [UIColor] = []
@@ -36,26 +36,6 @@ class ChartVC: UIViewController, ChartViewDelegate {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         addSubviews()
-    }
-    
-    override func viewDidLayoutSubviews() {
-        setCostLabelConstraints()
-        setDateLabelConstraints()
-        setChartConstraints()
-        setIntervalButtonsConstraints()
-    }
-    
-    func chartValueSelected(_ chartView: ChartViewBase, entry: ChartDataEntry, highlight: Highlight) {
-        costLabel.text = String(entry.y) + " hours"
-        if let timeResult = entry.data as? Double {
-            let date = Date(timeIntervalSince1970: timeResult)
-            let dateFormatter = DateFormatter()
-            dateFormatter.timeStyle = DateFormatter.Style.medium
-            dateFormatter.dateStyle = DateFormatter.Style.medium
-            dateFormatter.timeZone = .current
-            let localDate = dateFormatter.string(from: date)
-            dateLabel.text = localDate
-        }
     }
     
     private func setupShownDataSet(for interval: ChartInterval) {
@@ -141,7 +121,6 @@ class ChartVC: UIViewController, ChartViewDelegate {
 }
 
 extension ChartVC: UIDocumentPickerDelegate {
-    
     public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         guard let myURL = urls.first else {
             return
@@ -170,10 +149,8 @@ extension ChartVC: UIDocumentPickerDelegate {
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        
         var timestamps: [TimeInterval] = []
         var values: [Double] = []
-         
         for fileLine in parsedCSV {
             let lineComponents = fileLine.components(separatedBy: ";")
             if lineComponents.count == 2,
@@ -184,12 +161,24 @@ extension ChartVC: UIDocumentPickerDelegate {
                 values.append(value)
             }
         }
-        
         setupDataSet(xValues: timestamps, yValues: values)
-        
-        print(parsedCSV)
     }
-    
+}
+
+// - MARK: ChartViewDelegate
+extension ChartVC: ChartViewDelegate {
+    func chartValueSelected(_ chartView: ChartViewBase, entry: ChartDataEntry, highlight: Highlight) {
+        costLabel.text = String(entry.y) + " hours"
+        if let timeResult = entry.data as? Double {
+            let date = Date(timeIntervalSince1970: timeResult)
+            let dateFormatter = DateFormatter()
+            dateFormatter.timeStyle = DateFormatter.Style.medium
+            dateFormatter.dateStyle = DateFormatter.Style.medium
+            dateFormatter.timeZone = .current
+            let localDate = dateFormatter.string(from: date)
+            dateLabel.text = localDate
+        }
+    }
 }
 
 // - MARK: UITableViewDataSource + UITableViewDelegate
@@ -242,38 +231,38 @@ extension ChartVC {
     }
     
     @objc func selectFiles() {
-        let types = UTType.types(tag: "csv",
-                                 tagClass: UTTagClass.filenameExtension,
-                                 conformingTo: nil)
-        let documentPickerController = UIDocumentPickerViewController(
-                forOpeningContentTypes: types)
+        let types = UTType.types(tag: "csv", tagClass: UTTagClass.filenameExtension, conformingTo: nil)
+        let documentPickerController = UIDocumentPickerViewController(forOpeningContentTypes: types)
         documentPickerController.delegate = self
         self.present(documentPickerController, animated: true, completion: nil)
     }
     
 }
 
-// - Setting constraints
+// - MARK: Adding subviews
 extension ChartVC {
     
-    func setCostLabelConstraints() {
-        costLabel.translatesAutoresizingMaskIntoConstraints = false
-        costLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor,
-                                       constant: 16).isActive = true
-        costLabel.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        costLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 0).isActive = true
-        costLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: 0).isActive = true
+    private func addSubviews() {
+        addCostLabel()
+        addDateLabel()
+        addChartView()
+        addIntervalButtons()
+        addTableView()
     }
     
-    func setDateLabelConstraints() {
-        dateLabel.translatesAutoresizingMaskIntoConstraints = false
-        dateLabel.topAnchor.constraint(equalTo: costLabel.bottomAnchor, constant: 10).isActive = true
-        dateLabel.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        dateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0).isActive = true
-        dateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0).isActive = true
-    }
-    
-    func setChartConstraints() {
+    private func addChartView() {
+        chart.backgroundColor = .white
+        chart.tintColor = .systemGreen
+        chart.noDataTextColor = .black
+        chart.noDataText = "Need to load data to build a chart"
+        chart.noDataFont = .boldSystemFont(ofSize: 10)
+        chart.xAxis.enabled = false
+        chart.leftAxis.enabled = false
+        chart.rightAxis.enabled = false
+        chart.scaleYEnabled = false
+        chart.doubleTapToZoomEnabled = false
+        chart.delegate = self
+        view.addSubview(chart)
         chart.translatesAutoresizingMaskIntoConstraints = false
         chart.topAnchor.constraint(equalTo: dateLabel.bottomAnchor, constant: 0).isActive = true
         chart.heightAnchor.constraint(equalToConstant: 300).isActive = true
@@ -281,64 +270,32 @@ extension ChartVC {
         chart.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: 0).isActive = true
     }
     
-    func setIntervalButtonsConstraints() {
-        intervalButtonsStackView.translatesAutoresizingMaskIntoConstraints = false
-        intervalButtonsStackView.topAnchor.constraint(equalTo: chart.bottomAnchor, constant: 10).isActive = true
-        intervalButtonsStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        intervalButtonsStackView.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -40).isActive = true
-        intervalButtonsStackView.heightAnchor.constraint(equalToConstant: 40).isActive = true
-    }
-}
-
-// - MARK: Adding subviews
-extension ChartVC {
-    private func addSubviews() {
-        addChartView()
-        addCostLabel()
-        addDateLabel()
-        addIntervalButtons()
-        addTableView()
-    }
-    
-    private func addChartView() {
-        chart = LineChartView()
-        chart.backgroundColor = .white
-        chart.tintColor = .systemGreen
-        
-        chart.noDataTextColor = .black
-        chart.noDataText = "Need to load data to build a chart"
-        chart.noDataFont = .boldSystemFont(ofSize: 10)
-        
-        chart.xAxis.enabled = false
-        chart.leftAxis.enabled = false
-        chart.rightAxis.enabled = false
-        
-        chart.scaleYEnabled = false
-        chart.doubleTapToZoomEnabled = false
-        
-        chart.delegate = self
-        view.addSubview(chart)
-    }
-    
     private func addCostLabel() {
-        costLabel = UILabel()
-        costLabel.font = .boldSystemFont(ofSize: 32) // UIFont(name: "Arial Bold", size: 32.0)
+        costLabel.font = .boldSystemFont(ofSize: 32)
         costLabel.textColor = .black
         costLabel.textAlignment = .center
         view.addSubview(costLabel)
+        costLabel.translatesAutoresizingMaskIntoConstraints = false
+        costLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16).isActive = true
+        costLabel.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        costLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
+        costLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
     }
     
     private func addDateLabel() {
-        dateLabel = UILabel()
-        dateLabel.font = .systemFont(ofSize: 16) // UIFont(name: "Arial", size: 16.0)
+        dateLabel.font = .systemFont(ofSize: 16)
         dateLabel.textColor = .black
         dateLabel.textAlignment = .center
         view.addSubview(dateLabel)
+        dateLabel.translatesAutoresizingMaskIntoConstraints = false
+        dateLabel.topAnchor.constraint(equalTo: costLabel.bottomAnchor, constant: 10).isActive = true
+        dateLabel.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        dateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0).isActive = true
+        dateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0).isActive = true
     }
     
     private func addIntervalButtons() {
         intervalButtons = []
-        
         for interval in ChartInterval.allCases {
             let button = UIButton()
             button.backgroundColor = .clear
@@ -348,18 +305,19 @@ extension ChartVC {
             button.layer.borderWidth = 0
             button.layer.borderColor = UIColor.black.cgColor
             button.addTarget(self, action: #selector(intervalButtonTouchUpInside), for: .touchUpInside)
-            
             intervalButtons.append(button)
         }
-        
         intervalButtons[2].backgroundColor = #colorLiteral(red: 0.8864082694, green: 0.8902869821, blue: 0.8942552209, alpha: 1)
-        
         intervalButtonsStackView = UIStackView(arrangedSubviews: intervalButtons)
         intervalButtonsStackView.axis = .horizontal
         intervalButtonsStackView.distribution = .fillEqually
         intervalButtonsStackView.alignment = .fill
-        
         view.addSubview(intervalButtonsStackView)
+        intervalButtonsStackView.translatesAutoresizingMaskIntoConstraints = false
+        intervalButtonsStackView.topAnchor.constraint(equalTo: chart.bottomAnchor, constant: 10).isActive = true
+        intervalButtonsStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        intervalButtonsStackView.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -40).isActive = true
+        intervalButtonsStackView.heightAnchor.constraint(equalToConstant: 40).isActive = true
     }
     
     private func addTableView() {
@@ -373,6 +331,6 @@ extension ChartVC {
         tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16).isActive = true
     }
     
-    // TODO: make all constant like in video from Vasya
-    // TODO: make safeAreaLayoutGuide where need to
+    // TODO: make all constant like in video
+    // TODO: check iPad
 }
